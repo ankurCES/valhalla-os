@@ -22,52 +22,70 @@
 
     // 2. Menu Injection Logic
     function injectMenus() {
-        const sidebar = document.querySelector('#sidebar') || document.querySelector('.sidebar') || document.querySelector('nav');
-        if (!sidebar) return;
         if (document.getElementById('valhalla-workflows-link')) return;
 
+        // Try every possible selector for the sidebar container in various states
+        const sidebar = document.querySelector('#sidebar') || 
+                        document.querySelector('.sidebar') || 
+                        document.querySelector('nav') ||
+                        document.querySelector('div.app div.flex-row div.flex-col');
+        
+        if (!sidebar) return;
+
+        // Find anchors within the sidebar
         const anchors = Array.from(sidebar.querySelectorAll('a'));
+        if (anchors.length === 0) return;
+
+        // Target 'Workspace' specifically, or the last navigation-like item
         let targetLink = anchors.find(a => {
             const label = (a.getAttribute('aria-label') || "").toLowerCase();
             const text = (a.innerText || "").toLowerCase();
             return label.includes('workspace') || text.includes('workspace');
         });
         
-        if (!targetLink && anchors.length > 0) {
-            targetLink = anchors[anchors.length - 1];
+        if (!targetLink) {
+            // If workspace isn't found, find the one with an SVG (likely a menu item)
+            targetLink = anchors.reverse().find(a => a.querySelector('svg'));
         }
 
         if (targetLink) {
-            const workflowsDiv = document.createElement('div');
-            workflowsDiv.innerHTML = `
-                <a id="valhalla-workflows-link" class="${targetLink.className}" href="/workflows" style="cursor:pointer" aria-label="Workflows">
-                    <div class="self-center flex items-center justify-center size-9">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-1 self-center translate-y-[0.5px]">
-                        <div class=" self-center text-sm font-primary font-bold uppercase tracking-widest opacity-80">Workflows</div>
-                    </div>
-                </a>
-            `;
-            targetLink.parentElement.parentElement.appendChild(workflowsDiv);
+            // Svelte often wraps items in extra divs. Go up until we find the repeating unit.
+            const itemContainer = targetLink.closest('div.flex') || targetLink.parentElement;
+            
+            const createLink = (id, label, svgPath, href) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = itemContainer.className;
+                wrapper.innerHTML = `
+                    <a id="${id}" class="${targetLink.className}" href="${href}" style="cursor:pointer" aria-label="${label}">
+                        <div class="self-center flex items-center justify-center size-9">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
+                                ${svgPath}
+                            </svg>
+                        </div>
+                        <div class="flex flex-1 self-center translate-y-[0.5px]">
+                            <div class=" self-center text-sm font-primary font-bold uppercase tracking-widest opacity-80">${label}</div>
+                        </div>
+                    </a>
+                `;
+                return wrapper;
+            };
 
-            const dashboardsDiv = document.createElement('div');
-            dashboardsDiv.innerHTML = `
-                <a id="valhalla-dashboards-link" class="${targetLink.className}" href="/dashboards" style="cursor:pointer" aria-label="Dashboards">
-                    <div class=" self-center flex items-center justify-center size-9">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-1 self-center translate-y-[0.5px]">
-                        <div class=" self-center text-sm font-primary font-bold uppercase tracking-widest opacity-80">Dashboards</div>
-                    </div>
-                </a>
-            `;
-            targetLink.parentElement.parentElement.appendChild(dashboardsDiv);
+            const workflows = createLink(
+                'valhalla-workflows-link', 
+                'Workflows', 
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />',
+                '/workflows'
+            );
+
+            const dashboards = createLink(
+                'valhalla-dashboards-link', 
+                'Dashboards', 
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />',
+                '/dashboards'
+            );
+
+            itemContainer.parentElement.appendChild(workflows);
+            itemContainer.parentElement.appendChild(dashboards);
         }
     }
 
