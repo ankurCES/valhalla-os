@@ -30,11 +30,17 @@
                         document.querySelector('nav') ||
                         document.querySelector('div.app div.flex-row div.flex-col');
         
-        if (!sidebar) return;
+        if (!sidebar) {
+            console.log("Valhalla: Sidebar not found yet.");
+            return;
+        }
 
         // Find anchors within the sidebar
         const anchors = Array.from(sidebar.querySelectorAll('a'));
-        if (anchors.length === 0) return;
+        if (anchors.length === 0) {
+            console.log("Valhalla: No anchors found in sidebar yet.");
+            return;
+        }
 
         // Target 'Workspace' specifically, or the last navigation-like item
         let targetLink = anchors.find(a => {
@@ -45,10 +51,11 @@
         
         if (!targetLink) {
             // If workspace isn't found, find the one with an SVG (likely a menu item)
-            targetLink = anchors.reverse().find(a => a.querySelector('svg'));
+            targetLink = anchors.slice().reverse().find(a => a.querySelector('svg'));
         }
 
         if (targetLink) {
+            console.log("Valhalla: Injecting menus after", targetLink.getAttribute('aria-label'));
             // Svelte often wraps items in extra divs. Go up until we find the repeating unit.
             const itemContainer = targetLink.closest('div.flex') || targetLink.parentElement;
             
