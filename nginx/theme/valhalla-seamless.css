@@ -1,0 +1,44 @@
+/* 
+   Valhalla OS Seamless Theme Engine 
+   Target: Open WebUI, n8n, Superset
+*/
+
+:root {
+    --valhalla-bg: #020617;
+    --valhalla-surface: #0f172a;
+    --valhalla-border: #1e293b;
+    --valhalla-primary: #2563eb;
+    --valhalla-text: #f1f5f9;
+}
+
+/* Global Overrides */
+body, html {
+    background-color: var(--valhalla-bg) !important;
+    color: var(--valhalla-text) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--valhalla-bg); }
+::-webkit-scrollbar-thumb { background: var(--valhalla-border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--valhalla-primary); }
+
+/* n8n Specifics */
+.n8n-app, .main-content, .canvas-container {
+    background-color: var(--valhalla-bg) !important;
+}
+.header, .navbar, .side-menu {
+    background-color: var(--valhalla-surface) !important;
+    border-color: var(--valhalla-border) !important;
+}
+
+/* Open WebUI Specifics */
+#app, .chat-container {
+    background-color: var(--valhalla-bg) !important;
+}
+
+/* Superset Specifics */
+.superset-view, .dashboard-content {
+    background-color: var(--valhalla-bg) !important;
+}

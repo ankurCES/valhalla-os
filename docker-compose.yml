@@ -8,6 +8,7 @@ services:
     image: nginx:alpine
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/theme/valhalla-seamless.css:/usr/share/nginx/html/valhalla-seamless.css:ro
     ports:
       - "80:80"
     networks:
@@ -21,7 +22,9 @@ services:
 
   # 3. n8n (Automation Engine)
   n8n:
-    image: n8nio/n8n:latest
+    build: 
+      context: ./forks/n8n
+      dockerfile: docker/images/n8n/Dockerfile
     environment:
       - N8N_PATH=/n8n/
     networks:
@@ -29,13 +32,13 @@ services:
 
   # 4. Open WebUI (Chat Sovereign)
   chat:
-    image: ghcr.io/open-webui/open-webui:main
+    build: ./forks/open-webui
     networks:
       - valhalla-net
 
   # 5. Apache Superset (Intelligence)
   superset:
-    image: apache/superset:latest
+    build: ./forks/superset
     networks:
       - valhalla-net
 
