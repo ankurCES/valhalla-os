@@ -27,7 +27,8 @@
 		selectedFolder,
 		WEBUI_NAME,
 		sidebarWidth,
-		activeChatIds
+		activeChatIds,
+		brandConfig
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
@@ -705,7 +706,7 @@
 					>
 						<div class=" self-center flex items-center justify-center size-9">
 							<img
-								src="{WEBUI_BASE_URL}/static/favicon.png"
+								src={$brandConfig.logoUrl || "{WEBUI_BASE_URL}/static/favicon.png"}
 								class="sidebar-new-chat-icon size-6 rounded-full group-hover:hidden"
 								alt=""
 							/>
@@ -818,6 +819,55 @@
 							</a>
 						</Tooltip>
 					</div>
+
+					<div class="">
+						<Tooltip content={$i18n.t('Workflows')} placement="right">
+							<a
+								class=" cursor-pointer flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition group"
+								href="/workflows"
+								on:click={async (e) => {
+									e.stopImmediatePropagation();
+									e.preventDefault();
+
+									goto('/workflows');
+									itemClickHandler();
+								}}
+								aria-label={$i18n.t('Workflows')}
+								draggable="false"
+							>
+								<div class=" self-center flex items-center justify-center size-9">
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+									</svg>
+								</div>
+							</a>
+						</Tooltip>
+					</div>
+
+					<div class="">
+						<Tooltip content={$i18n.t('Dashboards')} placement="right">
+							<a
+								class=" cursor-pointer flex rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition group"
+								href="/dashboards"
+								on:click={async (e) => {
+									e.stopImmediatePropagation();
+									e.preventDefault();
+
+									goto('/dashboards');
+									itemClickHandler();
+								}}
+								aria-label={$i18n.t('Dashboards')}
+								draggable="false"
+							>
+								<div class=" self-center flex items-center justify-center size-9">
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+										<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+									</svg>
+								</div>
+							</a>
+						</Tooltip>
+					</div>
 				{/if}
 			</div>
 		</button>
@@ -900,7 +950,7 @@
 				>
 					<img
 						crossorigin="anonymous"
-						src="{WEBUI_BASE_URL}/static/favicon.png"
+						src={$brandConfig.logoUrl || "{WEBUI_BASE_URL}/static/favicon.png"}
 						class="sidebar-new-chat-icon size-6 rounded-full"
 						alt=""
 					/>
@@ -1043,6 +1093,49 @@
 
 								<div class="flex self-center translate-y-[0.5px]">
 									<div class=" self-center text-sm font-primary">{$i18n.t('Workspace')}</div>
+								</div>
+							</a>
+						</div>
+
+						<div class="px-[0.4375rem] flex justify-center text-gray-800 dark:text-gray-200">
+							<a
+								id="sidebar-workflows-button"
+								class="grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+								href="/workflows"
+								on:click={itemClickHandler}
+								draggable="false"
+								aria-label={$i18n.t('Workflows')}
+							>
+								<div class="self-center">
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+									</svg>
+								</div>
+
+								<div class="flex self-center translate-y-[0.5px]">
+									<div class=" self-center text-sm font-primary">{$i18n.t('Workflows')}</div>
+								</div>
+							</a>
+						</div>
+
+						<div class="px-[0.4375rem] flex justify-center text-gray-800 dark:text-gray-200">
+							<a
+								id="sidebar-dashboards-button"
+								class="grow flex items-center space-x-3 rounded-2xl px-2.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+								href="/dashboards"
+								on:click={itemClickHandler}
+								draggable="false"
+								aria-label={$i18n.t('Dashboards')}
+							>
+								<div class="self-center">
+									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+										<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+									</svg>
+								</div>
+
+								<div class="flex self-center translate-y-[0.5px]">
+									<div class=" self-center text-sm font-primary">{$i18n.t('Dashboards')}</div>
 								</div>
 							</a>
 						</div>

@@ -7,6 +7,9 @@ export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
 		extend: {
+			colors: {
+				primary: 'var(--color-primary, #2563eb)'
+			},
 			typography: {
 				DEFAULT: {
 					css: {

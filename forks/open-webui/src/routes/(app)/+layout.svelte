@@ -37,7 +37,8 @@
 		showSearch,
 		showSidebar,
 		showControls,
-		mobile
+		mobile,
+		brandConfig
 	} from '$lib/stores';
 
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -353,6 +354,12 @@
 		await tick();
 
 		loaded = true;
+		
+		brandConfig.subscribe(config => {
+			if (config.primaryColor) {
+				document.documentElement.style.setProperty('--color-primary', config.primaryColor);
+			}
+		});
 	});
 
 	const checkForVersionUpdates = async () => {

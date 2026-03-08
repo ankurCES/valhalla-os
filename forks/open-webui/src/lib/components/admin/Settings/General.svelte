@@ -17,7 +17,7 @@
 	import Switch from '$lib/components/common/Switch.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import { WEBUI_BUILD_HASH, WEBUI_VERSION } from '$lib/constants';
-	import { banners as _banners, config, showChangelog } from '$lib/stores';
+	import { banners as _banners, config, showChangelog, brandConfig } from '$lib/stores';
 	import type { Banner } from '$lib/types';
 	import { compareVersion } from '$lib/utils';
 	import { onMount, getContext } from 'svelte';
@@ -871,6 +871,40 @@
 						</div>
 
 						<Banners bind:banners />
+					</div>
+
+					<div class="mb-2.5">
+						<div class=" mt-0.5 mb-2.5 text-xs font-medium">{$i18n.t('Custom Branding')}</div>
+						<div class="flex flex-col gap-3">
+							<div class="flex w-full justify-between items-center">
+								<div class="text-xs font-medium">{$i18n.t('Primary Theme Color')}</div>
+								<div class="flex items-center gap-2">
+									<input
+										type="color"
+										class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none"
+										bind:value={$brandConfig.primaryColor}
+										on:change={() => {
+											document.documentElement.style.setProperty('--color-primary', $brandConfig.primaryColor);
+										}}
+									/>
+									<input
+										type="text"
+										class="w-24 bg-transparent border-b border-gray-500 text-xs font-mono outline-none"
+										bind:value={$brandConfig.primaryColor}
+									/>
+								</div>
+							</div>
+
+							<div class="flex w-full flex-col gap-1">
+								<div class="text-xs font-medium">{$i18n.t('Custom Logo URL')}</div>
+								<input
+									type="text"
+									class="w-full bg-gray-50 dark:bg-gray-850 rounded-lg py-2 px-3 text-xs outline-none"
+									placeholder="https://example.com/logo.png"
+									bind:value={$brandConfig.logoUrl}
+								/>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
