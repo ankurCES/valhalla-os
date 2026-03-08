@@ -1,0 +1,44 @@
+# valhalla-os/docker-compose.yml
+
+version: '3.8'
+
+services:
+  # 1. API Gateway (Nginx OSS)
+  gateway:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - valhalla-net
+
+  # 2. Valhalla Portal (SvelteKit Shell)
+  portal:
+    build: ./valhalla-portal
+    networks:
+      - valhalla-net
+
+  # 3. n8n (Automation Engine)
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      - N8N_PATH=/n8n/
+    networks:
+      - valhalla-net
+
+  # 4. Open WebUI (Chat Sovereign)
+  chat:
+    image: ghcr.io/open-webui/open-webui:main
+    networks:
+      - valhalla-net
+
+  # 5. Apache Superset (Intelligence)
+  superset:
+    image: apache/superset:latest
+    networks:
+      - valhalla-net
+
+networks:
+  valhalla-net:
+    driver: bridge
