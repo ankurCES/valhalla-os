@@ -22,22 +22,27 @@
 
     // 2. Menu Injection Logic
     function injectMenus() {
-        const sidebar = document.querySelector('.sidebar') || document.querySelector('nav');
+        const sidebar = document.querySelector('.sidebar') || document.querySelector('nav') || document.querySelector('[role="navigation"]');
         if (!sidebar) return;
         if (document.getElementById('valhalla-workflows-link')) return;
 
-        // Try to find the Workspace link or similar to insert after
+        // Find a suitable insertion point: Workspace, or the first list of links
         const anchors = Array.from(sidebar.querySelectorAll('a'));
-        const workspaceLink = anchors.find(a => a.innerText.toLowerCase().includes('workspace') || a.href.includes('/workspace'));
+        let targetLink = anchors.find(a => a.innerText.toLowerCase().includes('workspace') || a.href.includes('/workspace'));
         
-        if (workspaceLink) {
-            const parent = workspaceLink.parentElement;
+        // Fallback: If no workspace link, find the last link in the primary navigation group
+        if (!targetLink && anchors.length > 0) {
+            targetLink = anchors[anchors.length - 1];
+        }
+
+        if (targetLink) {
+            const parent = targetLink.closest('div.flex.flex-col') || targetLink.parentElement;
             
             // Workflows Link
             const workflowsDiv = document.createElement('div');
-            workflowsDiv.className = parent.className;
+            workflowsDiv.className = targetLink.parentElement.className;
             workflowsDiv.innerHTML = `
-                <a id="valhalla-workflows-link" class="${workspaceLink.className}" href="/workflows">
+                <a id="valhalla-workflows-link" class="${targetLink.className}" href="/workflows" style="cursor:pointer">
                     <div class="self-center flex items-center justify-center size-9">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -48,13 +53,13 @@
                     </div>
                 </a>
             `;
-            parent.after(workflowsDiv);
+            targetLink.parentElement.after(workflowsDiv);
 
             // Dashboards Link
             const dashboardsDiv = document.createElement('div');
-            dashboardsDiv.className = parent.className;
+            dashboardsDiv.className = targetLink.parentElement.className;
             dashboardsDiv.innerHTML = `
-                <a id="valhalla-dashboards-link" class="${workspaceLink.className}" href="/dashboards">
+                <a id="valhalla-dashboards-link" class="${targetLink.className}" href="/dashboards" style="cursor:pointer">
                     <div class=" self-center flex items-center justify-center size-9">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
