@@ -23,11 +23,11 @@ services:
     networks:
       - valhalla-net
 
-  # 4. Open WebUI (Chat Sovereign)
+  # 4. Open WebUI (Chat Sovereign & Primary Shell)
   chat:
     build: 
       context: ./forks/open-webui
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.valhalla
     environment:
       - WEBUI_AUTH=False
       - WEBUI_NAME=Valhalla Chat
