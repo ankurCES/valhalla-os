@@ -14,7 +14,7 @@
     };
 
     function updateLogos(url) {
-        document.querySelectorAll('img[src*="favicon.png"], .sidebar-new-chat-icon, img[alt="App Logo"]').forEach(img => {
+        document.querySelectorAll('img[src*="favicon.png"], .sidebar-new-chat-icon, img[alt="App Logo"], img[alt="logo"]').forEach(img => {
             img.src = url;
             img.srcset = url;
         });
@@ -24,94 +24,92 @@
     function injectMenus() {
         if (document.getElementById('valhalla-workflows-link')) return;
 
-        // Try every possible selector for the sidebar container in various states
+        // Find the Sidebar
         const sidebar = document.querySelector('#sidebar') || 
                         document.querySelector('.sidebar') || 
                         document.querySelector('nav') ||
-                        document.querySelector('div.app div.flex-row div.flex-col');
+                        document.querySelector('aside');
         
-        if (!sidebar) {
-            console.log("Valhalla: Sidebar not found yet.");
-            return;
-        }
+        if (!sidebar) return;
 
         // Find anchors within the sidebar
         const anchors = Array.from(sidebar.querySelectorAll('a'));
-        if (anchors.length === 0) {
-            console.log("Valhalla: No anchors found in sidebar yet.");
-            return;
-        }
-
-        // Target 'Workspace' specifically, or the last navigation-like item
-        let targetLink = anchors.find(a => {
-            const label = (a.getAttribute('aria-label') || "").toLowerCase();
-            const text = (a.innerText || "").toLowerCase();
-            return label.includes('workspace') || text.includes('workspace');
-        });
         
-        if (!targetLink) {
-            // If workspace isn't found, find the one with an SVG (likely a menu item)
-            targetLink = anchors.slice().reverse().find(a => a.querySelector('svg'));
-        }
+        // Target: "Workspace", "Notes", "New Chat", or anything with an SVG
+        let targetAnchor = anchors.find(a => {
+            const label = (a.getAttribute('aria-label') || "").toLowerCase();
+            const text = a.textContent.toLowerCase();
+            return label.includes('workspace') || text.includes('workspace');
+        }) || anchors.find(a => {
+            const label = (a.getAttribute('aria-label') || "").toLowerCase();
+            return label.includes('notes') || label.includes('chat');
+        }) || anchors.find(a => a.querySelector('svg'));
 
-        if (targetLink) {
-            console.log("Valhalla: Injecting menus after", targetLink.getAttribute('aria-label'));
-            // Svelte often wraps items in extra divs. Go up until we find the repeating unit.
-            const itemContainer = targetLink.closest('div.flex') || targetLink.parentElement;
-            
-            const createLink = (id, label, svgPath, href) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = itemContainer.className;
-                wrapper.innerHTML = `
-                    <a id="${id}" class="${targetLink.className}" href="${href}" style="cursor:pointer" aria-label="${label}">
-                        <div class="self-center flex items-center justify-center size-9">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4.5">
-                                ${svgPath}
-                            </svg>
-                        </div>
-                        <div class="flex flex-1 self-center translate-y-[0.5px]">
-                            <div class=" self-center text-sm font-primary font-bold uppercase tracking-widest opacity-80">${label}</div>
-                        </div>
-                    </a>
+        if (targetAnchor) {
+            // Find the repeating wrapper (usually <div class="flex"> inside a container)
+            const itemWrapper = targetAnchor.closest('div.flex')?.parentElement || targetAnchor.parentElement;
+            const listContainer = itemWrapper.parentElement;
+
+            if (!listContainer) return;
+
+            const createNavItem = (id, label, svgPath, href) => {
+                const navItem = document.createElement('div');
+                navItem.className = itemWrapper.className || "";
+                navItem.innerHTML = `
+                    <div class="flex">
+                        <a id="${id}" class="${targetAnchor.className}" href="${href}" draggable="false" aria-label="${label}" style="cursor:pointer; width:100%">
+                            <div class="self-center flex items-center justify-center size-9">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4.5">
+                                    ${svgPath}
+                                </svg>
+                            </div>
+                            <div class="flex flex-1 self-center translate-y-[0.5px]">
+                                <div class="self-center text-sm font-primary font-bold uppercase tracking-widest opacity-80">${label}</div>
+                            </div>
+                        </a>
+                    </div>
                 `;
-                return wrapper;
+                return navItem;
             };
 
-            const workflows = createLink(
+            const workflows = createNavItem(
                 'valhalla-workflows-link', 
                 'Workflows', 
                 '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />',
                 '/workflows'
             );
 
-            const dashboards = createLink(
+            const dashboards = createNavItem(
                 'valhalla-dashboards-link', 
                 'Dashboards', 
                 '<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />',
                 '/dashboards'
             );
 
-            itemContainer.parentElement.appendChild(workflows);
-            itemContainer.parentElement.appendChild(dashboards);
+            // Append to the list
+            listContainer.appendChild(workflows);
+            listContainer.appendChild(dashboards);
         }
     }
 
     // 3. IFrame Mounting logic
     function showIframe(type) {
-        const main = document.querySelector('main');
+        const main = document.querySelector('main') || document.querySelector('#chat-container') || document.body;
         if (!main) return;
 
-        // Hide Chat Content
+        // Hide Chat Content (but keep our frame)
         Array.from(main.children).forEach(child => {
-            if (child.id !== 'valhalla-frame') child.style.display = 'none';
+            if (child.id !== 'valhalla-frame' && child.id !== 'sidebar' && !child.classList.contains('sidebar')) {
+                child.style.display = 'none';
+            }
         });
 
         let valhallaFrame = document.getElementById('valhalla-frame');
         if (!valhallaFrame) {
             valhallaFrame = document.createElement('iframe');
             valhallaFrame.id = 'valhalla-frame';
-            valhallaFrame.style = "width:100%; height:100%; border:none; background:#020617";
-            main.appendChild(valhallaFrame);
+            valhallaFrame.style = "position:fixed; top:0; right:0; width:calc(100% - 260px); height:100%; border:none; background:#020617; z-index:50";
+            document.body.appendChild(valhallaFrame);
         }
         valhallaFrame.style.display = 'block';
         valhallaFrame.src = type === 'n8n' ? '/n8n/' : '/superset/';
@@ -124,6 +122,7 @@
             e.preventDefault();
             const type = link.id.includes('workflows') ? 'n8n' : 'superset';
             showIframe(type);
+            return;
         }
         
         // Return to chat if anything else is clicked in sidebar
@@ -131,7 +130,7 @@
         if (otherLink && !otherLink.id.includes('valhalla-')) {
             const valhallaFrame = document.getElementById('valhalla-frame');
             if (valhallaFrame) valhallaFrame.style.display = 'none';
-            const main = document.querySelector('main');
+            const main = document.querySelector('main') || document.querySelector('#chat-container');
             if (main) {
                 Array.from(main.children).forEach(child => {
                     if (child.id !== 'valhalla-frame') child.style.display = '';
@@ -144,7 +143,11 @@
     function injectThemeCustomizer() {
         if (document.getElementById('valhalla-theme-customizer')) return;
         
-        const sidebarBottom = document.querySelector('.sidebar.sticky.bottom-0') || document.querySelector('nav')?.parentElement?.querySelector('.sticky.bottom-0');
+        // Look for the user menu area or bottom of sidebar
+        const sidebarBottom = document.querySelector('.sidebar.sticky.bottom-0') || 
+                              document.querySelector('#sidebar > div:last-child') ||
+                              document.querySelector('nav')?.parentElement?.querySelector('.sticky.bottom-0');
+        
         if (!sidebarBottom) return;
 
         const customizerBtn = document.createElement('div');
@@ -226,9 +229,15 @@
         };
     }
 
-    // Initial load
+    // Initialize
     applyTheme();
     
+    // Polling as a fallback for MutationObserver
+    setInterval(() => {
+        injectMenus();
+        injectThemeCustomizer();
+    }, 2000);
+
     const observer = new MutationObserver(() => {
         injectMenus();
         injectThemeCustomizer();
